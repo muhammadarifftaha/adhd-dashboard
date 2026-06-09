@@ -1,0 +1,29 @@
+# Local development services.
+# The production homelab stack (Next.js app + cloudflared tunnel) will be added
+# alongside this `db` service later. Variable values are read from `.env`.
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: adhd-dashboard-db
+    restart: unless-stopped
+    environment:
+      # Required — compose aborts with a clear message if any is unset (no weak
+      # silent fallback). `cp .env.example .env` provides local dev values.
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    ports:
+      # Bind to loopback only so the DB is reachable from the host (where
+      # `next dev` runs) but never from the LAN. The production homelab stack
+      # will drop this mapping entirely and reach the DB over the compose network.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:
