@@ -1,5 +1,7 @@
+"use client";
 import React from "react";
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +10,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       enableSystem={true}
       attribute="class"
     >
-      {children}
+      <TooltipProvider>{children}</TooltipProvider>
     </ThemeProvider>
   );
 }
