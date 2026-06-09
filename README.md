@@ -31,7 +31,7 @@ Planned MVP modules:
 | Styling      | Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com) (Base UI)    |
 | Database     | PostgreSQL                                                        |
 | ORM          | [Prisma 7](https://www.prisma.io) (with the `pg` driver adapter)  |
-| Auth         | [Auth.js v5](https://authjs.dev) (email + password / credentials) |
+| Auth         | [Better Auth](https://www.better-auth.com) (email + password, DB-backed sessions) |
 | Deployment   | Docker Compose, self-hosted, exposed via Cloudflare Tunnel        |
 
 ## Architecture
@@ -73,9 +73,9 @@ pnpm install
 
 # 2. Configure environment
 cp .env.example .env
-#    Then edit .env — at minimum set DATABASE_URL and AUTH_SECRET.
+#    Then edit .env — at minimum set DATABASE_URL and BETTER_AUTH_SECRET.
 #    Generate an auth secret with:
-npx auth secret
+openssl rand -base64 32
 
 # 3. Apply the database schema and generate the Prisma client
 pnpm prisma migrate dev
