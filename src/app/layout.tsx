@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lexend } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import Providers from "./providers";
 
 const lexend = Lexend({
   variable: "--font-sans",
@@ -11,12 +12,24 @@ const lexend = Lexend({
 // Self-hosted Illinois Mono (SIL OFL). Files live in ./fonts; see fonts/OFL.txt.
 const illinoisMono = localFont({
   src: [
-    { path: "./fonts/IllinoisMono-Regular.ttf", weight: "400", style: "normal" },
+    {
+      path: "./fonts/IllinoisMono-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
     { path: "./fonts/IllinoisMono-Italic.ttf", weight: "400", style: "italic" },
     { path: "./fonts/IllinoisMono-Medium.ttf", weight: "500", style: "normal" },
-    { path: "./fonts/IllinoisMono-MediumItalic.ttf", weight: "500", style: "italic" },
+    {
+      path: "./fonts/IllinoisMono-MediumItalic.ttf",
+      weight: "500",
+      style: "italic",
+    },
     { path: "./fonts/IllinoisMono-Bold.ttf", weight: "700", style: "normal" },
-    { path: "./fonts/IllinoisMono-BoldItalic.ttf", weight: "700", style: "italic" },
+    {
+      path: "./fonts/IllinoisMono-BoldItalic.ttf",
+      weight: "700",
+      style: "italic",
+    },
   ],
   variable: "--font-illinois-mono",
   display: "swap",
@@ -35,9 +48,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${lexend.variable} ${illinoisMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

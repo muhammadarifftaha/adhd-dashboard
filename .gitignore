@@ -46,3 +46,6 @@ next-env.d.ts
 # local agent/session state
 .remember
 .claude
+
+# editor
+.vscode
