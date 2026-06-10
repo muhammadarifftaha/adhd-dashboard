@@ -30,6 +30,10 @@ const resend = new Resend(RESEND_API_KEY);
 // throwing, so surface it as a thrown Error to keep callers (Better Auth
 // hooks) on a single failure path.
 async function send(to: string, subject: string, react: React.ReactElement) {
+  // Test/CI seam: skip real delivery when explicitly opted in. Never set
+  // AUTH_EMAIL_TRANSPORT=noop in production — it silently drops every email.
+  if (process.env.AUTH_EMAIL_TRANSPORT === "noop") return;
+
   const { error } = await resend.emails.send({
     from: EMAIL_FROM,
     to,
