@@ -6,10 +6,10 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
+    <div className="min-h-screen w-full bg-neutral-100 dark:bg-neutral-900 flex flex-col">
       <DashboardHeader />
 
       {children}
-    </main>
+    </div>
   );
 }
