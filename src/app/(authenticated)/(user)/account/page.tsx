@@ -4,9 +4,13 @@ import React from "react";
 
 export default function UserProfile() {
   return (
-    <main className="grid grid-cols-4 flex-auto px-4 py-4 grid-rows-3 gap-4">
-      <ProfileCard />
-      <AuthCard />
+    <main className="flex flex-col justify-start items-start flex-auto px-4 py-4 gap-4">
+      <h1 className="text-2xl font-bold">Account Settings</h1>
+      <div className="flex flex-col md:flex-row justify-start items-start flex-auto gap-4">
+        <ProfileCard />
+        <AuthCard />
+        {/* Add more account-related cards here */}
+      </div>
     </main>
   );
 }

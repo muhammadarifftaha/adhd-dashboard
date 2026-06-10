@@ -38,6 +38,7 @@ model User {
 
   userSettings UserSettings?
   twoFactor    TwoFactor[]
+  events       Event[]
 
   @@unique([email])
   @@unique([username])
@@ -111,9 +112,52 @@ model UserSettings {
   user      User     @relation(fields: [id], references: [id], onDelete: Cascade)
   theme     String   @default("system")
   timezone  String   @default("UTC")
+  // Per-breakpoint react-grid-layout arrangement of the dashboard widgets,
+  // shaped as { [breakpoint]: LayoutItem[] }. Validated on write (see
+  // lib/schema/dashboard.ts); null until the user first rearranges a card.
+  dashboardLayout Json?
   // add more typed preference columns here as you need them
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("user_settings")
+}
+
+// A calendar event. Field names and semantics deliberately track the iCalendar
+// (RFC 5545) data model, which Google Calendar and Microsoft Graph both map to —
+// so a future sync integration is a field mapping, not a schema change.
+//
+// IMPORTANT: `end` is EXCLUSIVE, per the iCal/Google convention. An all-day event
+// on Jun 10 is stored as start=Jun-10 00:00, end=Jun-11 00:00; a Jun 10–12 all-day
+// event ends Jun-13 00:00. The rendering layer converts back to an inclusive last
+// day for display.
+model Event {
+  id     String @id @default(cuid())
+  // iCalendar UID: globally unique and stable across edits — the join key for
+  // external calendar sync. Generated on create (urn-style).
+  uid    String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  summary     String // iCal SUMMARY · Google summary · Graph subject
+  description String? // iCal DESCRIPTION · Graph body
+  location    String? // iCal LOCATION
+  start       DateTime
+  end         DateTime // exclusive (see note above)
+  allDay      Boolean  @default(false)
+  timeZone    String   @default("UTC") // IANA tz id (iCal TZID · Google/Graph timeZone)
+  status      String   @default("CONFIRMED") // CONFIRMED · TENTATIVE · CANCELLED
+  // Reserved for future recurrence (iCal RRULE · Google recurrence[]). Not yet
+  // surfaced in the UI; single events only for now.
+  rrule       String?
+  // Bumped on each edit — iCal SEQUENCE, used for sync conflict resolution.
+  sequence    Int      @default(0)
+  color       String? // UI label color; maps to Google colorId later
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Supports the month-range query (events for a user overlapping a window).
+  @@index([userId, start])
+  @@map("event")
 }

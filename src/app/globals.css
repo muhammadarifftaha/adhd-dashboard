@@ -141,3 +141,46 @@
     cursor: pointer;
   }
 }
+
+/* react-grid-layout: theme the drag placeholder (defaults to solid red). */
+.react-grid-item.react-grid-placeholder {
+  background: var(--primary);
+  border-radius: var(--radius);
+  opacity: 0.12;
+}
+
+/* Make the resize affordance obvious: RGL hides the handle until hover and
+   draws a faint 5px corner — instead show a visible grip at rest that darkens
+   on hover. (Prefixed with .react-grid-layout to outrank the library default.) */
+.react-grid-layout .react-grid-item > .react-resizable-handle {
+  width: 20px;
+  height: 20px;
+  opacity: 0.55;
+}
+.react-grid-layout .react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
+}
+.react-grid-layout
+  .react-grid-item
+  > .react-resizable-handle.react-resizable-handle-se::after {
+  right: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  border-right: 2.5px solid var(--muted-foreground);
+  border-bottom: 2.5px solid var(--muted-foreground);
+  border-bottom-right-radius: 2px;
+}
+.react-grid-layout
+  .react-grid-item:hover
+  > .react-resizable-handle.react-resizable-handle-se::after {
+  border-color: var(--foreground);
+}
+
+/* Layout lock: hide resize handles and drop the grab cursor while locked. */
+.dashboard-locked .react-resizable-handle {
+  display: none;
+}
+.dashboard-locked .drag-handle {
+  cursor: default;
+}

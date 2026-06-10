@@ -50,7 +50,7 @@ finishing) tasks rewarding.
 | ORM            | [Prisma 7](https://www.prisma.io) (with the `pg` driver adapter)             |
 | Auth           | [Better Auth](https://www.better-auth.com) (email + password, 2FA, sessions) |
 | Object storage | [MinIO](https://min.io) (S3-compatible), for avatars & uploads               |
-| Email          | [Resend](https://resend.com) + [React Email](https://react.email)           |
+| Email          | [Resend](https://resend.com) + [React Email](https://react.email)            |
 | Deployment     | Docker Compose, self-hosted, exposed via Cloudflare Tunnel                   |
 
 ## Architecture
@@ -58,7 +58,7 @@ finishing) tasks rewarding.
 This project is designed to be **fully self-hosted on a personal homelab** — no
 managed cloud services required. The intended runtime topology:
 
-```
+```text
                  Internet
                     │
             Cloudflare Tunnel
@@ -118,7 +118,7 @@ for the full, documented list. `.env` is git-ignored; never commit real secrets.
 
 ## Project structure
 
-```
+```text
 src/
   app/          # Next.js App Router routes, layouts, pages
   components/   # React components (ui/ holds shadcn primitives)
