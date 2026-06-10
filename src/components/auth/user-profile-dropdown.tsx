@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,10 +22,23 @@ import {
 
 import { Spinner } from "../ui/spinner";
 import { useSession } from "@/hooks/use-session";
+import { authClient } from "@/lib/auth-client";
 
 export default function UserProfileDropdown() {
   const { data, isPending, isRefetching } = useSession();
   const isLoading = isPending || isRefetching;
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+    // Clear any session-derived server-rendered state, then leave the app.
+    router.push("/auth/sign-in");
+    router.refresh();
+  };
 
   return (
     <DropdownMenu>
@@ -66,7 +81,7 @@ export default function UserProfileDropdown() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem render={<Link href="/sign-out" />}>
+          <DropdownMenuItem onClick={handleSignOut}>
             <LogOutIcon className="mr-2" />
             Sign Out
           </DropdownMenuItem>
