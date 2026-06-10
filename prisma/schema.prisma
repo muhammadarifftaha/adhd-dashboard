@@ -25,14 +25,15 @@ model User {
 
   username        String?
   displayUsername String?
+  userInitials    String?
 
   // Better Auth admin plugin
-  role            String?   @default("user")
-  banned          Boolean?  @default(false)
-  banReason       String?
-  banExpires      DateTime?
+  role       String?   @default("user")
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
 
-  userSettings    UserSettings?
+  userSettings UserSettings?
 
   @@unique([email])
   @@unique([username])
@@ -40,16 +41,16 @@ model User {
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   ipAddress      String?
   userAgent      String?
   impersonatedBy String?
   userId         String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@index([userId])

@@ -34,5 +34,16 @@ export const auth = betterAuth({
     // accounts can be created/used without proving control of the email.
     requireEmailVerification: false,
   },
+  user: {
+    // Better Auth only returns core + plugin fields in the session; any extra
+    // Prisma column must be declared here or it is silently stripped from the
+    // `/get-session` payload (the DB column alone is not enough).
+    additionalFields: {
+      userInitials: {
+        type: "string",
+        required: false, // nullable column; existing rows start as null
+      },
+    },
+  },
   plugins: [username(), admin(), nextCookies()], // nextCookies MUST be last
 });
