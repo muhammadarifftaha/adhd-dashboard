@@ -24,15 +24,15 @@ Planned MVP modules:
 
 ## Tech stack
 
-| Layer        | Choice                                                            |
-| ------------ | ----------------------------------------------------------------- |
-| Framework    | [Next.js 16](https://nextjs.org) (App Router, React 19)           |
-| Language     | TypeScript                                                        |
-| Styling      | Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com) (Base UI)    |
-| Database     | PostgreSQL                                                        |
-| ORM          | [Prisma 7](https://www.prisma.io) (with the `pg` driver adapter)  |
-| Auth         | [Better Auth](https://www.better-auth.com) (email + password, DB-backed sessions) |
-| Deployment   | Docker Compose, self-hosted, exposed via Cloudflare Tunnel        |
+| Layer      | Choice                                                                            |
+| ---------- | --------------------------------------------------------------------------------- |
+| Framework  | [Next.js 16](https://nextjs.org) (App Router, React 19)                           |
+| Language   | TypeScript                                                                        |
+| Styling    | Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com) (Base UI)                    |
+| Database   | PostgreSQL                                                                        |
+| ORM        | [Prisma 7](https://www.prisma.io) (with the `pg` driver adapter)                  |
+| Auth       | [Better Auth](https://www.better-auth.com) (email + password, DB-backed sessions) |
+| Deployment | Docker Compose, self-hosted, exposed via Cloudflare Tunnel                        |
 
 ## Architecture
 
@@ -108,13 +108,13 @@ prisma/         # Prisma schema, migrations, seed script
 
 Per-folder TypeScript path aliases are configured in `tsconfig.json`:
 
-| Alias          | Path              |
-| -------------- | ----------------- |
-| `@/*`          | `src/*`           |
-| `@app/*`       | `src/app/*`       |
-| `@components/*`| `src/components/*`|
-| `@lib/*`       | `src/lib/*`       |
-| `@hooks/*`     | `src/hooks/*`     |
+| Alias           | Path               |
+| --------------- | ------------------ |
+| `@/*`           | `src/*`            |
+| `@app/*`        | `src/app/*`        |
+| `@components/*` | `src/components/*` |
+| `@lib/*`        | `src/lib/*`        |
+| `@hooks/*`      | `src/hooks/*`      |
 
 ## Deployment
 
@@ -130,12 +130,16 @@ for a small production image.
 This is a personal project shared openly. Issues and pull requests are welcome — please
 open an issue to discuss substantial changes first.
 
-## AI assistance disclaimer
-
-Parts of this project were developed with the assistance of
-[Claude](https://www.anthropic.com/claude) (via Claude Code). All AI-generated code and
-configuration has been reviewed by a human maintainer before inclusion.
-
 ## License
 
-[MIT](./LICENSE) © Muhammad Ariff Taha
+ADHD Dashboard is source-available under the
+[Business Source License 1.1](./LICENSE).
+
+- ✅ Free for personal use and self-hosted deployments
+- ✅ Free to fork and modify for non-commercial purposes
+- ❌ Commercial use, reselling, or offering as a hosted service requires a separate license
+
+For commercial licensing inquiries, see [COMMERCIAL_LICENSE.md](./COMMERCIAL_LICENSE.md)
+or contact contact@muhammadarifftaha.dev.
+
+Contributions are welcome and subject to the [Contributor License Agreement](./CLA.md).
