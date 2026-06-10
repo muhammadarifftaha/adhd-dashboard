@@ -27,8 +27,9 @@ export async function signIn(
   }
   const { username, password, rememberMe } = parsed.data;
 
+  let result;
   try {
-    await auth.api.signInUsername({
+    result = await auth.api.signInUsername({
       body: { username, password, rememberMe },
       headers: await headers(),
     });
@@ -39,6 +40,13 @@ export async function signIn(
     );
     log.error({ error, username }, "Sign-in failed");
     return { error: message };
+  }
+
+  // With 2FA enabled, sign-in does NOT establish a full session — it returns a
+  // twoFactorRedirect and sets a short-lived cookie (forwarded by nextCookies).
+  // Send the user to the second-factor page to finish authenticating.
+  if ((result as { twoFactorRedirect?: boolean } | null)?.twoFactorRedirect) {
+    redirect("/auth/2fa");
   }
 
   // Success — redirect() navigates the client; nothing is returned.

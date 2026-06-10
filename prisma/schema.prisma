@@ -33,11 +33,28 @@ model User {
   banReason  String?
   banExpires DateTime?
 
+  // Better Auth two-factor plugin
+  twoFactorEnabled Boolean? @default(false)
+
   userSettings UserSettings?
+  twoFactor    TwoFactor[]
 
   @@unique([email])
   @@unique([username])
   @@map("user")
+}
+
+model TwoFactor {
+  id          String  @id
+  secret      String
+  backupCodes String
+  // Defaults to false on enable; flipped to true once a TOTP code is verified.
+  verified    Boolean @default(true)
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("two_factor")
 }
 
 model Session {

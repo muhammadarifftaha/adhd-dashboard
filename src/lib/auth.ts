@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth/minimal";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./db";
-import { username, admin } from "better-auth/plugins";
+import { username, admin, twoFactor } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 
 // Fail fast on misconfiguration instead of silently coercing with `!`.
@@ -35,6 +35,14 @@ export const auth = betterAuth({
     requireEmailVerification: false,
   },
   user: {
+    changeEmail: {
+      enabled: true,
+      // No email transport is wired yet and accounts are unverified, so allow a
+      // direct change without a confirmation email. This only takes effect while
+      // `emailVerified` is false. Revisit alongside the email-verification TODO
+      // above before any multi-user / production exposure.
+      updateEmailWithoutVerification: true,
+    },
     // Better Auth only returns core + plugin fields in the session; any extra
     // Prisma column must be declared here or it is silently stripped from the
     // `/get-session` payload (the DB column alone is not enough).
@@ -45,5 +53,14 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: [username(), admin(), nextCookies()], // nextCookies MUST be last
+  plugins: [
+    username(),
+    admin(),
+    // `issuer` is the label shown in authenticator apps. Default flow:
+    // enable() generates the secret but does NOT turn 2FA on until the user
+    // verifies a TOTP code (verifyTotp) — so a half-finished setup can't lock
+    // anyone out.
+    twoFactor({ issuer: "ADHD Dashboard" }),
+    nextCookies(), // nextCookies MUST be last
+  ],
 });
