@@ -3,6 +3,7 @@ import { CalendarDays, Inbox, ListTodo, Sun } from "lucide-react";
 
 import Calendar from "@components/dashboard/calendar";
 import type { WidgetId } from "@lib/schema/dashboard";
+import TodayWidget from "./today";
 
 function Placeholder({ label }: { label: string }) {
   return (
@@ -29,7 +30,7 @@ export const WIDGETS: Record<WidgetId, WidgetDefinition> = {
   today: {
     title: "Today",
     icon: <Sun className="size-4 text-muted-foreground" />,
-    content: <Placeholder label="Your agenda and daily habits" />,
+    content: <TodayWidget />,
   },
   quickCapture: {
     title: "Quick Capture",

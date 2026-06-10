@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { addDays, format, parseISO } from "date-fns";
+import { addDays, addMinutes, format, parseISO } from "date-fns";
 import { Clock, Loader2Icon, MapPin, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@components/ui/button";
@@ -34,11 +34,16 @@ import { eventLastDay } from "@lib/calendar/layout";
 import { createEvent, deleteEvent, updateEvent } from "@components/calendar/actions";
 
 // Drives the dialog from the calendar: a clicked day opens "create", a clicked
-// event opens "view" (which can switch to editing in place).
+// event opens "view" (which can switch to editing in place). Create mode can
+// optionally carry a preset `start` (e.g. a Today-grid click rounded to the
+// nearest 10 min) and `end`; when absent we fall back to the day-only defaults.
 export type EventDialogState =
   | { mode: "closed" }
-  | { mode: "create"; date: Date }
+  | { mode: "create"; date: Date; start?: Date; end?: Date }
   | { mode: "view"; event: CalendarEvent };
+
+// Default length applied to a create-mode preset `start` when no `end` is given.
+const DEFAULT_DURATION_MIN = 60;
 
 type Props = {
   state: EventDialogState;
@@ -120,8 +125,22 @@ function toFormValues(state: EventDialogState): FormValues {
   };
 
   if (state.mode === "create") {
-    const day = format(state.date, "yyyy-MM-dd");
-    return { ...blank, startDate: day, endDate: day };
+    // No preset time: seed the date only and keep the blank 09:00–10:00 default.
+    if (!state.start) {
+      const day = format(state.date, "yyyy-MM-dd");
+      return { ...blank, startDate: day, endDate: day };
+    }
+    // Preset time (e.g. a clicked grid position rounded to the nearest 10 min):
+    // seed start from it and end from `end` ?? start + DEFAULT_DURATION_MIN.
+    const start = state.start;
+    const end = state.end ?? addMinutes(start, DEFAULT_DURATION_MIN);
+    return {
+      ...blank,
+      startDate: format(start, "yyyy-MM-dd"),
+      startTime: format(start, "HH:mm"),
+      endDate: format(end, "yyyy-MM-dd"),
+      endTime: format(end, "HH:mm"),
+    };
   }
   if (state.mode === "view") {
     const { event } = state;
@@ -179,11 +198,21 @@ export default function EventDialog({ state, onClose, onSaved, onDeleted }: Prop
     defaultValues: toFormValues(state),
   });
 
-  // Re-seed the form and reset transient UI each time the dialog target changes.
-  useEffect(() => {
-    reset(toFormValues(state));
+  // Reset the transient UI (edit toggle, delete confirmation) whenever the dialog
+  // target changes. Done during render via a previous-value guard rather than in
+  // an effect, so it doesn't schedule an extra commit+render pass.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevState, setPrevState] = useState(state);
+  if (prevState !== state) {
+    setPrevState(state);
     setEditing(state.mode === "create");
     setConfirmingDelete(false);
+  }
+
+  // Re-seed the form fields when the target changes. `reset` updates React Hook
+  // Form's own store (an external system) — that's what effects are for.
+  useEffect(() => {
+    reset(toFormValues(state));
   }, [state, reset]);
 
   const showForm = state.mode === "create" || editing;
