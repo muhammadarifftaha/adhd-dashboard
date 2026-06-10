@@ -8,6 +8,7 @@ import { Loader2Icon } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 import { useSession } from "@hooks/use-session";
+import { changeUsername } from "./actions";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { Field, FieldError, FieldLabel } from "@components/ui/field";
@@ -136,11 +137,11 @@ export function ChangeUsernameDialog() {
   });
 
   const onSubmit = async ({ username }: UsernameValues) => {
-    // The username plugin validates uniqueness on /update-user and returns
-    // USERNAME_IS_ALREADY_TAKEN, surfaced here as error.message.
-    const { error } = await authClient.updateUser({ username });
-    if (error) {
-      toast.error(error.message ?? "Could not update username.");
+    // Routed through a server action so a security-notification email is sent.
+    // Uniqueness is still enforced by the username plugin (USERNAME_IS_ALREADY_TAKEN).
+    const result = await changeUsername(username);
+    if (result?.error) {
+      toast.error(result.error);
       return;
     }
     toast.success("Username updated.");

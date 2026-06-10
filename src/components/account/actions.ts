@@ -6,6 +6,8 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { putObject, deleteObject } from "@/lib/storage";
 import { ProfileUpdateData, profileUpdateSchema } from "@/lib/schema/profile";
+import { toClientErrorMessage } from "@/lib/safe-error";
+import { sendUsernameChangedEmail } from "@/lib/email";
 
 // Avatars are small; cap uploads so a bad/oversized file can't exhaust memory.
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -121,6 +123,39 @@ export async function updateProfile(
   } catch (error) {
     log.error({ error, userId: session.user.id }, "Failed to update profile");
     return { error: "Could not save your profile. Please try again." };
+  }
+
+  return undefined;
+}
+
+/**
+ * Change the current user's username. Routed through a server action (rather
+ * than the client `updateUser`) so we can send a security-notification email
+ * to the account address afterwards. Uniqueness/normalization is enforced by
+ * the username plugin's /update-user hook. Returns `{ error }` on failure.
+ */
+export async function changeUsername(
+  username: string,
+): Promise<{ error: string } | undefined> {
+  const log = logger.child({ function: "changeUsername", module: "account" });
+
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return { error: "You must be signed in to change your username." };
+  }
+
+  try {
+    await auth.api.updateUser({ body: { username }, headers: await headers() });
+  } catch (error) {
+    log.error({ error, userId: session.user.id }, "Username change failed");
+    return { error: toClientErrorMessage(error, "Could not update your username.") };
+  }
+
+  // Best-effort security alert — never fail the change if the email doesn't send.
+  try {
+    await sendUsernameChangedEmail(session.user.email, username, session.user.name);
+  } catch (error) {
+    log.warn({ error, userId: session.user.id }, "Failed to send username-changed email");
   }
 
   return undefined;
