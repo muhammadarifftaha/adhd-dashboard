@@ -25,5 +25,27 @@ services:
       timeout: 5s
       retries: 10
 
+  # S3-compatible object storage for files/images (avatars, attachments).
+  # The app talks to it over the S3 API, so the same code targets AWS S3 / R2
+  # if this ever moves off the homelab.
+  minio:
+    image: minio/minio
+    container_name: adhd-dashboard-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD in .env}
+    ports:
+      # Loopback only, mirroring `db`: reachable from the host (where `next dev`
+      # runs) but never the LAN. 9000 = S3 API, 9001 = web console.
+      # The production homelab stack drops these mappings and reaches MinIO over
+      # the compose network at `http://minio:9000`.
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+
 volumes:
   db_data:
+  minio_data:
