@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
 import { toClientErrorMessage } from "@/lib/safe-error";
+import { generateInitials } from "@/lib/initials";
 import { SignUpAdminFormData, signUpAdminSchema } from "@/lib/schema/admin";
 
 // First-run bootstrap: creates the first admin. Returns { error } on failure
@@ -21,6 +22,7 @@ export async function signUpAdmin(
     return { error: "Invalid input." };
   }
   const { username, email, displayUsername, name, password } = parsed.data;
+  const userInitials = generateInitials(name, username);
 
   // SECURITY: this endpoint may only ever create the *first* admin. The proxy
   // redirect is not a boundary (server actions can bypass it), so the guard
@@ -33,7 +35,7 @@ export async function signUpAdmin(
   let userId: string;
   try {
     const data = await auth.api.signUpEmail({
-      body: { username, email, displayUsername, name, password },
+      body: { username, email, displayUsername, name, password, userInitials },
       headers: await headers(),
     });
     userId = data.user.id;

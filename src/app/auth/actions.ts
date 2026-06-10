@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { logger } from "@/lib/logger";
 import { toClientErrorMessage } from "@/lib/safe-error";
+import { generateInitials } from "@/lib/initials";
 import {
   SignInFormData,
   SignUpFormData,
@@ -54,10 +55,14 @@ export async function signUp(
     return { error: "Invalid input." };
   }
   const { username, email, displayUsername, name, password } = parsed.data;
+  // Derive initials at creation time so the avatar fallback is populated from
+  // the first session. `userInitials` is a declared additionalField, so Better
+  // Auth persists it from the sign-up body.
+  const userInitials = generateInitials(name, username);
 
   try {
     await auth.api.signUpEmail({
-      body: { username, email, displayUsername, name, password },
+      body: { username, email, displayUsername, name, password, userInitials },
       headers: await headers(),
     });
   } catch (error) {
