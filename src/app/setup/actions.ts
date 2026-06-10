@@ -53,13 +53,30 @@ export async function signUpAdmin(
   // Wrapped so a failed promotion doesn't crash and lock setup out (the user
   // record already exists, so the count guard would block a retry).
   try {
-    await prisma.user.update({ where: { id: userId }, data: { role: "admin" } });
+    // Auto-verify the bootstrap admin: the server owner shouldn't need an email
+    // round-trip to finish first-run setup.
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: "admin", emailVerified: true },
+    });
   } catch (error) {
     log.error(
       { error, userId, username },
       "Failed to promote bootstrap user to admin",
     );
     return { error: "Could not complete admin setup. Please try again." };
+  }
+
+  // With requireEmailVerification on, signUpEmail does not establish a session.
+  // Sign the (now-verified) admin in so setup can proceed straight to /admin.
+  try {
+    await auth.api.signInEmail({
+      body: { email, password },
+      headers: await headers(),
+    });
+  } catch (error) {
+    log.error({ error, userId, username }, "Bootstrap admin auto sign-in failed");
+    return { error: "Admin created — please sign in to continue." };
   }
 
   redirect("/admin");

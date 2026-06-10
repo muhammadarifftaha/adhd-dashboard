@@ -15,3 +15,15 @@ export function toClientErrorMessage(error: unknown, fallback: string): string {
   }
   return fallback;
 }
+
+/**
+ * True when the error is Better Auth's "email not verified" sign-in rejection.
+ * Lets callers route the user to a "check your email" page (Better Auth has
+ * already re-sent a verification link) instead of surfacing a raw error.
+ * Checks both the code and the known message for resilience across versions.
+ */
+export function isEmailNotVerified(error: unknown): boolean {
+  if (!(error instanceof APIError)) return false;
+  const body = error.body as { code?: string; message?: string } | undefined;
+  return body?.code === "EMAIL_NOT_VERIFIED" || body?.message === "Email not verified";
+}

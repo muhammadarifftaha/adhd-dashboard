@@ -3,7 +3,7 @@ import { auth } from "@lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { logger } from "@/lib/logger";
-import { toClientErrorMessage } from "@/lib/safe-error";
+import { toClientErrorMessage, isEmailNotVerified } from "@/lib/safe-error";
 import { generateInitials } from "@/lib/initials";
 import {
   SignInFormData,
@@ -34,6 +34,12 @@ export async function signIn(
       headers: await headers(),
     });
   } catch (error) {
+    // Unverified accounts can't sign in — Better Auth has already re-sent a
+    // verification link, so route to the "check your email" page rather than
+    // showing a raw error.
+    if (isEmailNotVerified(error)) {
+      redirect("/auth/verify-email");
+    }
     const message = toClientErrorMessage(
       error,
       "An unknown error occurred during sign-in.",
@@ -82,5 +88,7 @@ export async function signUp(
     return { error: message };
   }
 
-  redirect("/");
+  // With verification required, sign-up doesn't establish a session — a
+  // verification link was emailed. Send the user to the "check your email" page.
+  redirect("/auth/verify-email");
 }

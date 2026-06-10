@@ -44,7 +44,6 @@ type EmailValues = z.infer<typeof emailSchema>;
 
 export function ChangeEmailDialog() {
   const [open, setOpen] = useState(false);
-  const { refetch } = useSession();
   const {
     control,
     handleSubmit,
@@ -61,8 +60,9 @@ export function ChangeEmailDialog() {
       toast.error(error.message ?? "Could not change email.");
       return;
     }
-    toast.success("Email updated.");
-    await refetch();
+    // Verified accounts get a confirmation link at their CURRENT address; the
+    // email isn't changed until they click it, so don't claim it's done.
+    toast.success("Check your current email to confirm the change.");
     reset();
     setOpen(false);
   };
@@ -75,7 +75,8 @@ export function ChangeEmailDialog() {
           <DialogHeader>
             <DialogTitle>Change email</DialogTitle>
             <DialogDescription>
-              Enter the new email address for your account.
+              We&apos;ll send a confirmation link to your current email to
+              approve the change.
             </DialogDescription>
           </DialogHeader>
           <Controller

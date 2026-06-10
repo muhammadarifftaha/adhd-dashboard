@@ -31,22 +31,19 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    // TODO(security): email verification is intentionally disabled for the
-    // current single-admin internal dashboard. The Resend transport is now
-    // wired (see `emailVerification.sendVerificationEmail` below), so flipping
-    // this to `true` later is safe — but only AFTER existing users are
-    // verified, otherwise the current unverified admin would be locked out of
-    // sign-in. Without this, accounts can be created/used without proving
-    // control of the email.
-    requireEmailVerification: false,
+    // Verification required: unverified accounts cannot sign in. Sign-up and
+    // unverified sign-in both send a verification link via the hooks below.
+    // The first-run setup flow auto-verifies the bootstrap admin (see
+    // setup/actions.ts) so the server owner isn't blocked on email.
+    requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await sendPasswordResetEmail(user.email, url, user.name);
     },
   },
   emailVerification: {
-    // `sendOnSignUp` is intentionally left off so the current sign-up flow is
-    // unchanged (no verification email is forced at registration). Verification
-    // can still be requested manually via sendVerificationEmail / the API.
+    // `sendOnSignUp` is left unset: Better Auth falls back to
+    // requireEmailVerification (now true), so sign-up still triggers a
+    // verification email — and the banner / API can request one on demand.
     sendVerificationEmail: async ({ user, url }) => {
       await sendVerificationEmail(user.email, url, user.name);
     },
@@ -54,10 +51,10 @@ export const auth = betterAuth({
   user: {
     changeEmail: {
       enabled: true,
-      // No email transport is wired yet and accounts are unverified, so allow a
-      // direct change without a confirmation email. This only takes effect while
-      // `emailVerified` is false. Revisit alongside the email-verification TODO
-      // above before any multi-user / production exposure.
+      // Only applies while `emailVerified` is false. Now that verification is
+      // required, signed-in users are always verified, so email changes go
+      // through the confirmation flow (sendChangeEmailConfirmation) below —
+      // this flag is effectively dormant, kept only for the unverified edge.
       updateEmailWithoutVerification: true,
       // NOTE: this version of Better Auth names the hook
       // `sendChangeEmailConfirmation` (not `sendChangeEmailVerification`); the
