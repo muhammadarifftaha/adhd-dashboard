@@ -26,7 +26,7 @@ The following uses are permitted under the standard BSL license at no cost:
 To inquire about a commercial license, please contact:
 
 **Muhammad Ariff Taha bin Haron**
-contact@muhammadarifftaha.dev
+<contact@muhammadarifftaha.dev>
 
 Please include:
 

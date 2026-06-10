@@ -5,12 +5,29 @@ workday. It's designed around how an ADHD brain actually works: low-friction cap
 a clear "what now?" view, and dopamine-positive feedback loops that make starting (and
 finishing) tasks rewarding.
 
-> **Status:** Early scaffold. The stack, tooling, and project conventions are in place;
-> feature modules and the database schema are being built out. Expect breaking changes.
+> **Status:** Pre-MVP. Authentication and account management are built; the core
+> feature modules (tasks, habits, gamification) and their schema are next. Expect
+> breaking changes.
 
 ## Features
 
-Planned MVP modules:
+### Built
+
+- **Accounts & authentication** — email + password sign-in via [Better Auth](https://www.better-auth.com)
+  with database-backed sessions, required email verification, and password reset.
+- **Two-factor authentication** — optional TOTP (authenticator app); activation only
+  completes after a code is verified, so a half-finished setup can't lock you out.
+- **First-run admin setup** — role-based access via the admin plugin; the first account
+  is provisioned through a guided setup flow (or the `prisma db seed` script).
+- **Account settings** — change email (with re-verification), username, and password,
+  and toggle 2FA — all from the profile dropdown.
+- **Profile** — editable display name and avatar, uploaded to self-hosted MinIO object
+  storage, with auto-generated initials as a fallback.
+- **Transactional email** — verification, password-reset, email-change, and
+  username-changed messages, authored with [React Email](https://react.email) and
+  delivered through [Resend](https://resend.com).
+
+### Planned (MVP modules)
 
 - **Tasks** — capture and complete tasks with a focused "today" view.
 - **Quick Capture** — a frictionless braindump inbox so a thought never blocks the
@@ -24,15 +41,17 @@ Planned MVP modules:
 
 ## Tech stack
 
-| Layer      | Choice                                                                            |
-| ---------- | --------------------------------------------------------------------------------- |
-| Framework  | [Next.js 16](https://nextjs.org) (App Router, React 19)                           |
-| Language   | TypeScript                                                                        |
-| Styling    | Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com) (Base UI)                    |
-| Database   | PostgreSQL                                                                        |
-| ORM        | [Prisma 7](https://www.prisma.io) (with the `pg` driver adapter)                  |
-| Auth       | [Better Auth](https://www.better-auth.com) (email + password, DB-backed sessions) |
-| Deployment | Docker Compose, self-hosted, exposed via Cloudflare Tunnel                        |
+| Layer          | Choice                                                                       |
+| -------------- | ---------------------------------------------------------------------------- |
+| Framework      | [Next.js 16](https://nextjs.org) (App Router, React 19)                      |
+| Language       | TypeScript                                                                   |
+| Styling        | Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com) (Base UI)               |
+| Database       | PostgreSQL                                                                   |
+| ORM            | [Prisma 7](https://www.prisma.io) (with the `pg` driver adapter)             |
+| Auth           | [Better Auth](https://www.better-auth.com) (email + password, 2FA, sessions) |
+| Object storage | [MinIO](https://min.io) (S3-compatible), for avatars & uploads               |
+| Email          | [Resend](https://resend.com) + [React Email](https://react.email)           |
+| Deployment     | Docker Compose, self-hosted, exposed via Cloudflare Tunnel                   |
 
 ## Architecture
 
@@ -49,8 +68,10 @@ managed cloud services required. The intended runtime topology:
             └───────┬────────┘
                     │
             ┌───────▼────────┐        ┌──────────────┐
-            │  Next.js app   │ ─────▶ │  PostgreSQL  │
-            │  (standalone)  │        │              │
+            │                │ ─────▶ │  PostgreSQL  │
+            │  Next.js app   │        └──────────────┘
+            │  (standalone)  │        ┌──────────────┐
+            │                │ ─────▶ │  MinIO (S3)  │
             └────────────────┘        └──────────────┘
 ```
 
@@ -101,7 +122,8 @@ for the full, documented list. `.env` is git-ignored; never commit real secrets.
 src/
   app/          # Next.js App Router routes, layouts, pages
   components/   # React components (ui/ holds shadcn primitives)
-  lib/          # Shared utilities, db client, auth config
+  emails/       # React Email templates for transactional mail
+  lib/          # Shared utilities — db client, auth, storage, email
   hooks/        # Custom React hooks
 prisma/         # Prisma schema, migrations, seed script
 ```
@@ -140,6 +162,6 @@ ADHD Dashboard is source-available under the
 - ❌ Commercial use, reselling, or offering as a hosted service requires a separate license
 
 For commercial licensing inquiries, see [COMMERCIAL_LICENSE.md](./COMMERCIAL_LICENSE.md)
-or contact contact@muhammadarifftaha.dev.
+or contact <contact@muhammadarifftaha.dev>.
 
 Contributions are welcome and subject to the [Contributor License Agreement](./CLA.md).

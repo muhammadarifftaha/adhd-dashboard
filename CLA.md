@@ -36,4 +36,4 @@ and agree to this Contributor License Agreement.
 
 ---
 
-Contact: contact@muhammadarifftaha.dev
+Contact: <contact@muhammadarifftaha.dev>
